@@ -1,0 +1,10 @@
+# Environment variables — never commit real credentials
+.env
+
+# Go build artifacts
+backend/*.exe
+backend/tmp/
+
+# OS files
+.DS_Store
+Thumbs.db
