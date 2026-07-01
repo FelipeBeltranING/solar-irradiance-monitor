@@ -51,7 +51,7 @@ func main() {
 	// ─── REST API (Gin) ─────────────────────────────────
 	router := gin.Default()
 
-	router.Static("/", "../dashboard")
+	//router.Static("/", "../dashboard")
 
 	apiHandler := api.New(influxClient.RawClient(), InfluxOrg, InfluxBucket)
 	apiHandler.RegisterRoutes(router)
