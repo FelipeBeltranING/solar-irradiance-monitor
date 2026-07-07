@@ -51,10 +51,14 @@ func main() {
 	// ─── REST API (Gin) ─────────────────────────────────
 	router := gin.Default()
 
-	//router.Static("/", "../dashboard")
-
+	// API routes first
 	apiHandler := api.New(influxClient.RawClient(), InfluxOrg, InfluxBucket)
 	apiHandler.RegisterRoutes(router)
+
+	// Dashboard static files — explicit routes to avoid wildcard conflict
+	router.StaticFile("/", "../dashboard/index.html")
+	router.StaticFile("/style.css", "../dashboard/style.css")
+	router.StaticFile("/app.js", "../dashboard/app.js")
 
 	log.Printf("[SYS] Server running on %s", ServerPort)
 	log.Printf("[SYS] Dashboard available at http://localhost%s", ServerPort)
