@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"time"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -41,11 +41,12 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 // Returns the most recent reading from InfluxDB
 func (h *Handler) getLatestReading(c *gin.Context) {
 	query := fmt.Sprintf(`
-		from(bucket: "%s")
-			|> range(start: -1h)
-			|> filter(fn: (r) => r._measurement == "station_readings")
-			|> last()
-			|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+	from(bucket: "%s")
+    	|> range(start: -24h)
+    	|> filter(fn: (r) => r._measurement == "station_readings")
+    	|> sort(columns: ["_time"], desc: true)
+    	|> limit(n: 1)
+   		|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
 	`, h.bucket)
 
 	result, err := h.runQuery(c.Request.Context(), query)

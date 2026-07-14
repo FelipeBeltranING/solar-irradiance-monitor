@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,10 +25,17 @@
       </div>
     </div>
     <div class="header-right">
-      <div class="conn-badge" id="connBadge">
+      <div class="conn-badge">
         <span class="conn-dot" id="connDot"></span>
         <span id="connLabel">Conectando...</span>
       </div>
+      <!-- Theme toggle -->
+      <label class="theme-switch" title="Cambiar tema">
+        <input type="checkbox" id="themeToggle" onchange="toggleTheme(this)" />
+        <span class="switch-track">
+          <span class="switch-icon">☀️</span>
+        </span>
+      </label>
     </div>
   </header>
 
@@ -39,14 +46,15 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
         Live
       </button>
-      <button class="nav-btn" onclick="showPanel('values', this)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        Values
-      </button>
       <button class="nav-btn" onclick="showPanel('charts', this)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         Charts
       </button>
+      <button class="nav-btn" onclick="showPanel('values', this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Values
+      </button>
+    
     </div>
   </nav>
 
@@ -60,16 +68,16 @@
           <h2 class="section-title">Condiciones actuales</h2>
           <p class="section-sub" id="lastUpdate">Esperando primera lectura...</p>
         </div>
-        <div class="refresh-hint">Actualiza cada 5 min</div>
+        <div class="refresh-hint">Actualiza cada 10 s</div>
       </div>
 
       <div class="cards">
 
-        <div class="card" id="cardTemp">
+        <div class="card">
           <div class="card-top">
             <span class="card-label">Temperatura</span>
             <span class="card-icon temp-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
             </span>
           </div>
           <div class="card-value-row">
@@ -80,18 +88,19 @@
             <div class="gauge-track">
               <div class="gauge-fill" id="gaugeTemp"></div>
             </div>
-            <div class="gauge-labels">
-              <span>-40°C</span><span>85°C</span>
-            </div>
+            <div class="gauge-labels"><span>-40°C</span><span>85°C</span></div>
           </div>
-          <span class="badge" id="badgeTemp">—</span>
+          <div class="card-footer">
+            <span class="badge" id="badgeTemp">—</span>
+            <span class="card-range">Normal 15° – 40°C</span>
+          </div>
         </div>
 
-        <div class="card" id="cardHum">
+        <div class="card">
           <div class="card-top">
             <span class="card-label">Humedad</span>
             <span class="card-icon hum-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
             </span>
           </div>
           <div class="card-value-row">
@@ -102,18 +111,19 @@
             <div class="gauge-track">
               <div class="gauge-fill" id="gaugeHum"></div>
             </div>
-            <div class="gauge-labels">
-              <span>0%</span><span>100%</span>
-            </div>
+            <div class="gauge-labels"><span>0%</span><span>100%</span></div>
           </div>
-          <span class="badge" id="badgeHum">—</span>
+          <div class="card-footer">
+            <span class="badge" id="badgeHum">—</span>
+            <span class="card-range">Normal 20% – 80%</span>
+          </div>
         </div>
 
-        <div class="card" id="cardIrr">
+        <div class="card">
           <div class="card-top">
             <span class="card-label">Irradiancia</span>
             <span class="card-icon irr-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
             </span>
           </div>
           <div class="card-value-row">
@@ -124,17 +134,17 @@
             <div class="gauge-track">
               <div class="gauge-fill" id="gaugeIrr"></div>
             </div>
-            <div class="gauge-labels">
-              <span>0</span><span>1200 W/m²</span>
-            </div>
+            <div class="gauge-labels"><span>0</span><span>1200 W/m²</span></div>
           </div>
-          <span class="badge" id="badgeIrr">—</span>
+          <div class="card-footer">
+            <span class="badge" id="badgeIrr">—</span>
+            <span class="card-range">Normal 50 – 900 W/m²</span>
+          </div>
         </div>
 
       </div>
 
-      <!-- Station status -->
-      <div class="station-bar" id="stationBar">
+      <div class="station-bar">
         <span class="station-dot" id="stationDot"></span>
         <span id="stationMsg">Esperando datos...</span>
       </div>
@@ -216,34 +226,31 @@
         <button class="btn-query" onclick="queryCharts()">Consultar</button>
       </div>
 
-      <div id="chartsSplit">
+      <div id="chartsSplit" style="display:grid; gap:16px">
         <div class="chart-card">
           <div class="chart-card-header">
-            <span class="chart-dot" style="background:#f59e0b"></span>
-            <span>Temperatura (°C)</span>
+            <span class="chart-dot" style="background:#10b981"></span>Irradiancia (W/m²)
+          </div>
+          <canvas id="chartIrr"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-dot" style="background:#f59e0b"></span>Temperatura (°C)
           </div>
           <canvas id="chartTemp"></canvas>
         </div>
         <div class="chart-card">
           <div class="chart-card-header">
-            <span class="chart-dot" style="background:#3b82f6"></span>
-            <span>Humedad (%)</span>
+            <span class="chart-dot" style="background:#3b82f6"></span>Humedad (%)
           </div>
           <canvas id="chartHum"></canvas>
-        </div>
-        <div class="chart-card">
-          <div class="chart-card-header">
-            <span class="chart-dot" style="background:#10b981"></span>
-            <span>Irradiancia (W/m²)</span>
-          </div>
-          <canvas id="chartIrr"></canvas>
         </div>
       </div>
 
       <div class="chart-card" id="chartsMerged" style="display:none">
         <div class="chart-card-header">
-          <span class="chart-dot" style="background:#f59e0b"></span><span style="margin-right:16px">Temperatura</span>
-          <span class="chart-dot" style="background:#3b82f6"></span><span style="margin-right:16px">Humedad</span>
+          <span class="chart-dot" style="background:#f59e0b"></span><span style="margin-right:14px">Temperatura</span>
+          <span class="chart-dot" style="background:#3b82f6"></span><span style="margin-right:14px">Humedad</span>
           <span class="chart-dot" style="background:#10b981"></span><span>Irradiancia</span>
         </div>
         <canvas id="chartAll" style="max-height:340px"></canvas>
@@ -251,6 +258,5 @@
     </div>
 
   </main>
-
 </body>
 </html>
