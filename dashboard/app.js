@@ -28,7 +28,9 @@ function todayStr() {
 }
 
 function toUnix(dateStr, timeStr) {
-  return Math.floor(new Date(`${dateStr}T${timeStr}:00`).getTime() / 1000)
+  return Math.floor(
+    new Date(`${dateStr}T${timeStr}:00-05:00`).getTime() / 1000
+  )
 }
 
 function formatTime(isoStr) {
@@ -60,19 +62,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Load live data and initial historical data
   fetchLive()
-  
-  fetchReadings(
-  today,
-  '05:00',
-  today,
-  '19:00'
-)
-.then(data => {
-  console.log("TEST READINGS:", data)
-})
-.catch(err => {
-  console.error("TEST ERROR:", err)
-})
+  loadInitialData()
 
   // Refresh live readings periodically
   setInterval(fetchLive, POLL_INTERVAL_MS)
@@ -82,11 +72,24 @@ window.addEventListener('DOMContentLoaded', () => {
 function showPanel(id, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
+
   document.getElementById('panel-' + id).classList.add('active')
   btn.classList.add('active')
+
+  // Redraw gauges when returning to the Live panel
   if (id === 'live' && lastReading) {
     resetGauges()
-    requestAnimationFrame(() => requestAnimationFrame(redrawGauges))
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(redrawGauges)
+    })
+  }
+
+  // Render charts when the panel becomes visible
+  if (id === 'charts' && chartsData.length > 0) {
+    requestAnimationFrame(() => {
+      renderCharts(chartsData)
+    })
   }
 }
 
@@ -210,7 +213,8 @@ async function fetchLive() {
 }
 
 // ── Shared data + filter sync ─────────────────────────
-let sharedData = []
+let valuesData = []
+let chartsData = []
 
 async function fetchReadings(fromDate, fromTime, toDate, toTime) {
   const res = await fetch(
@@ -223,18 +227,30 @@ async function fetchReadings(fromDate, fromTime, toDate, toTime) {
 // ── Initial historical data load ───────────────────────
 async function loadInitialData() {
   try {
-    const today = todayStr()
 
-    sharedData = await fetchReadings(
-      today,
-      '05:00',
-      today,
-      '19:00'
+    valuesData = await fetchReadings(
+      document.getElementById('vFromDate').value,
+      document.getElementById('vFromTime').value,
+      document.getElementById('vToDate').value,
+      document.getElementById('vToTime').value
     )
 
-    // Render table and charts with the default range
-    renderTable(sharedData)
-    renderCharts(sharedData)
+    chartsData = await fetchReadings(
+      document.getElementById('cFromDate').value,
+      document.getElementById('cFromTime').value,
+      document.getElementById('cToDate').value,
+      document.getElementById('cToTime').value
+    )
+
+    // Render table with initial data
+    renderTable(valuesData)
+
+    // Render charts only if the charts panel is visible
+    if (document.getElementById('panel-charts').classList.contains('active')) {
+      requestAnimationFrame(() => {
+        renderCharts(chartsData)
+      })
+    }
 
   } catch (e) {
     console.error('Error loading initial data:', e)
@@ -253,7 +269,7 @@ async function queryData() {
   syncFilters('v')
 
   try {
-    sharedData = await fetchReadings(
+    valuesData = await fetchReadings(
       document.getElementById('vFromDate').value,
       document.getElementById('vFromTime').value,
       document.getElementById('vToDate').value,
@@ -261,8 +277,7 @@ async function queryData() {
     )
 
     // Update table and charts using the same dataset
-    renderTable(sharedData)
-    renderCharts(sharedData)
+    renderTable(valuesData)
 
   } catch (e) {
     alert(e.message)
@@ -295,14 +310,14 @@ function setChartMode(mode) {
   document.getElementById('chartsMerged').style.display = mode === 'merged' ? 'block' : 'none'
   document.getElementById('btnSplit').classList.toggle('active',  mode === 'split')
   document.getElementById('btnMerged').classList.toggle('active', mode === 'merged')
-  if (sharedData.length > 0) renderCharts(sharedData)
+  if (chartsData.length > 0) renderCharts(chartsData)
 }
 
 async function queryCharts() {
   syncFilters('c')
 
   try {
-    sharedData = await fetchReadings(
+    chartsData = await fetchReadings(
       document.getElementById('cFromDate').value,
       document.getElementById('cFromTime').value,
       document.getElementById('cToDate').value,
@@ -310,8 +325,7 @@ async function queryCharts() {
     )
 
     // Update charts and table using the same dataset
-    renderCharts(sharedData)
-    renderTable(sharedData)
+    renderCharts(chartsData)
 
   } catch (e) {
     alert(e.message)
